@@ -1325,12 +1325,8 @@ class ThreadsafeForwardingResult(TestResult):
             self.semaphore.release()
 
     def startTest(self, test):
-        self.semaphore.acquire()
-        try:
-            self._test_start = self._now()
-            super(ThreadsafeForwardingResult, self).startTest(test)
-        finally:
-            self.semaphore.release()
+        self._test_start = self._now()
+        super(ThreadsafeForwardingResult, self).startTest(test)
 
     def wasSuccessful(self):
         return self.result.wasSuccessful()
