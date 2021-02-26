@@ -1223,6 +1223,19 @@ class ThreadsafeForwardingResult(TestResult):
     def _any_tags(self, tags):
         return bool(tags[0] or tags[1])
 
+    def _now(self):
+        """Return the current 'test time'.
+
+        If the time() method has not been called, this is equivalent to
+        datetime.now(), otherwise its the last supplied datestamp given to the
+        time() method.
+        """
+        self.semaphore.acquire()
+        try:
+            return super(ThreadsafeForwardingResult, self)._now()
+        finally:
+            self.semaphore.release()
+
     def _add_result_with_semaphore(self, method, test, *args, **kwargs):
         now = self._now()
         self.semaphore.acquire()
@@ -1312,8 +1325,12 @@ class ThreadsafeForwardingResult(TestResult):
             self.semaphore.release()
 
     def startTest(self, test):
-        self._test_start = self._now()
-        super(ThreadsafeForwardingResult, self).startTest(test)
+        self.semaphore.acquire()
+        try:
+            self._test_start = self._now()
+            super(ThreadsafeForwardingResult, self).startTest(test)
+        finally:
+            self.semaphore.release()
 
     def wasSuccessful(self):
         return self.result.wasSuccessful()
