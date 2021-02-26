@@ -1240,7 +1240,7 @@ class ThreadsafeForwardingResult(TestResult):
         now = self._now()
         self.semaphore.acquire()
         try:
-            self.result.time(test.start_time)
+            self.result.time(self._test_start)
             self.result.startTest(test)
             self.result.time(now)
             if self._any_tags(self._global_tags):
@@ -1325,8 +1325,7 @@ class ThreadsafeForwardingResult(TestResult):
             self.semaphore.release()
 
     def startTest(self, test):
-        test.start_time = self._now()
-        self._test_start = self._now()
+        self._test_start = datetime.datetime.now(utc)
         super(ThreadsafeForwardingResult, self).startTest(test)
 
     def wasSuccessful(self):
