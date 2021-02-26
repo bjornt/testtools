@@ -1238,10 +1238,10 @@ class ThreadsafeForwardingResult(TestResult):
             try:
                 method(test, *args, **kwargs)
             finally:
+                self._test_start = None
                 self.result.stopTest(test)
         finally:
             self.semaphore.release()
-        self._test_start = None
 
     def addError(self, test, err=None, details=None):
         self._add_result_with_semaphore(
